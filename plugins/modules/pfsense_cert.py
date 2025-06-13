@@ -352,7 +352,9 @@ class PFSenseCertModule(PFSenseModuleBase):
                 return self.pfsense.phpshell("""
                     require_once('certs.inc');
                     init_config_arr(array('cert'));
-                    $cert =& lookup_cert('{refid}');
+                    $cert_config =& lookup_cert('{refid}');
+                    $cert_path   =  'cert/' . strval($cert_config['idx']);
+                    $cert        =& $cert_config['item'];
 
                     $pconfig = array( 'dn_commonname'         => '{dn_commonname}',
                                       'dn_country'            => '{dn_country}',
@@ -400,6 +402,8 @@ class PFSenseCertModule(PFSenseModuleBase):
                         }}
                         print_r($input_errors);
                     }}
+
+                    config_set_path($cert_path, $cert);
                     $savemsg = sprintf(gettext("Created internal certificate %s"), $cert['descr']);
                     write_config($savemsg);""".format(refid=self.target_elt.find('refid').text,
                                                       dn_commonname=self.params['name'],
